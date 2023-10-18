@@ -31,7 +31,7 @@ class Unet_pl(pl.LightningModule):
                 sampler=None, 
                 conditional=False):
         super().__init__()
-        self.model = Unet(dim=dim, channels=dim, init_dim=init_dim, out_dim=out_dim, self_condition=conditional)
+        self.model = Unet(dim=dim, channels=channels, init_dim=init_dim, out_dim=out_dim, self_condition=conditional)
         self.batch_size = batch_size
         self.lr_init = learning_rate
         self.learning_rate_decay = learning_rate_decay
@@ -40,11 +40,7 @@ class Unet_pl(pl.LightningModule):
         betas = linear_beta_schedule(timesteps, beta_start, beta_end)
         self.diffusion = Diffusion(betas)
 
-        self.init_conv = nn.Conv3d(channels, dim, 7, padding = 3)
-        self.init_conv_condition = nn.Sequential(
-            Upsample(channels, dim)
-            #Upsample(dim, dim)
-        )
+        self.init_condition = nn.Upsample(scale_factor = 2, mode='trilinear')
 
         self.loss_type = loss_type
         self.sampler = sampler
@@ -54,9 +50,8 @@ class Unet_pl(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         if self.conditional:
             hr, lr = batch 
-            hr = self.init_conv(hr)
-            lr = self.init_conv_condition(lr)
-            x = hr -lr
+            lr = self.init_condition(lr)
+            x = (hr -lr)
             labels = lr
         else:
             x = batch
@@ -78,8 +73,7 @@ class Unet_pl(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         if self.conditional:
             hr, lr = batch 
-            hr = self.init_conv(hr)
-            lr = self.init_conv_condition(lr)
+            lr = self.init_condition(lr)
             x = hr - lr
             labels = lr
         else:
@@ -132,7 +126,7 @@ def main():
 
     ### training params
     num_epochs = 300
-    batch_size =1
+    batch_size =4
     learning_rate = 1e-5
     learning_rate_decay = 0.99
 

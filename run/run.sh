@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-gpu=6
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
-export CUDA_VISIBLE_DEVICES=3 # where X is the GPU id of an available GPU
+export CUDA_VISIBLE_DEVICES=2 # where X is the GPU id of an available GPU
 
 # activate python environment
 source ~/.bashrc
