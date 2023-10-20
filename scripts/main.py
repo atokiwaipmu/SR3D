@@ -140,7 +140,7 @@ def main():
     HR_dir = "/gpfs02/work/tanimura/ana/UNet/data/dens_magneticum_snap25_Box128_grid128_CIC_noRSD/"
     mid_dir = "/gpfs02/work/tanimura/ana/UNet/data/dens_magneticum_snap25_Box128_grid64_CIC_noRSD/"
 
-    n_maps=100
+    n_maps=9261
     rate_train =0.8
 
     ### model parameters
