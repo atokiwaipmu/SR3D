@@ -1,4 +1,6 @@
 log/
-scripts/__pycache__/
-.ipynb_checkpoints/
-ckpt_logs
+ckpt_logs/
+img
+**/ipynb_checkpoints/
+*.pyc
+**/__pycache__/

@@ -8,13 +8,7 @@ from collections import namedtuple
 from functools import wraps
 from einops import rearrange
 
-class RMSNorm(nn.Module):
-    def __init__(self, dim):
-        super().__init__()
-        self.g = nn.Parameter(torch.ones(1, dim, 1, 1, 1))
-
-    def forward(self, x):
-        return F.normalize(x, dim = 1) * self.g * (x.shape[1] ** 0.5)
+from scripts.layers.normalization import Norms
 
 AttentionConfig = namedtuple('AttentionConfig', ['enable_flash', 'enable_math', 'enable_mem_efficient'])
 def once(fn):
@@ -114,25 +108,26 @@ class LinearAttention(nn.Module):
         self,
         dim,
         heads = 4,
-        dim_head = 32
+        dim_head = 32,
+        norm_type = 'group'
     ):
         super().__init__()
         self.scale = dim_head ** -0.5
         self.heads = heads
         hidden_dim = dim_head * heads
 
-        self.norm = RMSNorm(dim)
+        self.norm = Norms(dim, norm_type)
         self.to_qkv = nn.Conv3d(dim, hidden_dim * 3, 1, bias = False)
 
         self.to_out = nn.Sequential(
             nn.Conv3d(hidden_dim, dim, 1),
-            RMSNorm(dim)
+            Norms(dim, norm_type)
         )
 
     def forward(self, x):
         b, c, d, h, w = x.shape
 
-        #x = self.norm(x)
+        x = self.norm(x)
 
         qkv = self.to_qkv(x).chunk(3, dim = 1)
         q, k, v = map(lambda t: rearrange(t, 'b (h c) x y z -> b h c (x y z)', h = self.heads), qkv)
@@ -154,13 +149,14 @@ class Attention(nn.Module):
         dim,
         heads = 4,
         dim_head = 32,
-        flash = False
+        flash = False,
+        norm_type = 'group'
     ):
         super().__init__()
         self.heads = heads
         hidden_dim = dim_head * heads
 
-        self.norm = RMSNorm(dim)
+        self.norm = Norms(dim, norm_type)
         self.attend = Attend(flash = flash)
 
         self.to_qkv = nn.Conv3d(dim, hidden_dim * 3, 1, bias = False)
@@ -169,7 +165,7 @@ class Attention(nn.Module):
     def forward(self, x):
         b, c, d, h, w = x.shape
 
-        #x = self.norm(x)
+        x = self.norm(x)
 
         qkv = self.to_qkv(x).chunk(3, dim = 1)
         q, k, v = map(lambda t: rearrange(t, 'b (h c) x y z -> b h (x y z) c', h = self.heads), qkv)
