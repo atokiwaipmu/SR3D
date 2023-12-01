@@ -43,7 +43,7 @@ def setup_trainer(params,fname=None):
 
 def get_parser(): #list of args: [base_dir, n_maps, order, transform_type, model, conditioning, norm_type, act_type, block, scheduler, target, batch_size]
     parser = argparse.ArgumentParser(description='Run diffusion process on maps.')
-    parser.add_argument('--base_dir', type=str, default="/gpfs02/work/akira.tokiwa/gpgpu/Github/SR-SPHERE",
+    parser.add_argument('--base_dir', type=str, default="/gpfs02/work/akira.tokiwa/gpgpu/Github/SR3D",
                         help='Base directory for the project.')
     parser.add_argument('--n_maps', type=int, default=None,
                         help='Number of maps to use.')

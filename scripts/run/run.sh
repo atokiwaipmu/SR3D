@@ -16,4 +16,4 @@ source ~/.bashrc
 conda activate pylit
 
 cd /gpfs02/work/akira.tokiwa/gpgpu/Github/SR3D
-python -m scripts.run.main --use_attn True --batch_size 4
+python -m scripts.run.main --n_maps 2000 --use_attn True --batch_size 4
