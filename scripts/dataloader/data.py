@@ -3,6 +3,7 @@ import os
 import glob
 import numpy as np
 import torch
+from tqdm import tqdm
 from torchvision.transforms import Compose, ToTensor, Normalize
 import torch.utils.data as data
 
@@ -37,7 +38,7 @@ class MapDataset(data.Dataset):
         self.maps = sorted(glob.glob(f'{mapdir}*.npy'))[:n_maps]
 
     def __getitem__(self, index):
-        dmaps = np.array([np.load(map) for map in self.maps])  
+        dmaps = np.array([np.load(map) for map in tqdm(self.maps, desc='Loading maps', total=len(self.maps))])  
         tensor_map = torch.from_numpy(dmaps).float()
         
         return tensor_map
@@ -67,9 +68,12 @@ def get_normalized_data(data_loaded, transform_type='minmax'):
     data_normalized = transform_class.transform(data_loaded)
     return data_normalized, transform_class
 
-def get_data_from_params(params):
+def get_data_from_params(params, normalize_dens=True):
     lr = get_data(params["data"]["LR_dir"], params["data"]["n_maps"])   
     print("LR data loaded from {}.  Number of maps: {}".format(params["data"]["LR_dir"], params["data"]["n_maps"]))
+    if normalize_dens:
+        lr = lr / params["data"]["upsample_scale"]**3
+        print("LR data normalized to density field dividing by cube upsample_scale = {}".format(params["data"]["upsample_scale"]**3))
     hr = get_data(params["data"]["HR_dir"], params["data"]["n_maps"])
     print("HR data loaded from {}.  Number of maps: {}".format(params["data"]["HR_dir"], params["data"]["n_maps"]))
     return lr, hr

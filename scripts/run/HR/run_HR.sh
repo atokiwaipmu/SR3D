@@ -9,11 +9,11 @@
 #SBATCH --cpus-per-gpu=6
 
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
-export CUDA_VISIBLE_DEVICES=1 # where X is the GPU id of an available GPU
+export CUDA_VISIBLE_DEVICES=6 # where X is the GPU id of an available GPU
 
 # activate python environment
 source ~/.bashrc
 conda activate pylit
 
 cd /gpfs02/work/akira.tokiwa/gpgpu/Github/SR3D
-python -m scripts.run.main --n_maps 2000 --mask True --use_attn True --batch_size 2
+python -m scripts.run.main --n_maps 2000 --mask False --use_attn True --batch_size 2
